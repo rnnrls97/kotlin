@@ -192,8 +192,7 @@ fun DataForm(
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        TitleComponent(title = "Name")
-        // Text input for 'name', allowing any string value
+        TitleComponent(title = "Descrição")
         OutlinedTextField(
             value = name.value,
             onValueChange = { newValue ->
@@ -201,7 +200,7 @@ fun DataForm(
             },
             textStyle = TextStyle(color = Color.Black),
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { ExpenseTextView(text = "Enter name") },
+            placeholder = { ExpenseTextView(text = "Descrição") },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Color.Black,
                 unfocusedBorderColor = Color.Black,
@@ -214,7 +213,7 @@ fun DataForm(
 
         Spacer(modifier = Modifier.size(24.dp))
 
-        TitleComponent("Amount")
+        TitleComponent("Valor")
         OutlinedTextField(
             value = amount.value,
             onValueChange = { newValue ->
@@ -237,7 +236,7 @@ fun DataForm(
             },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            placeholder = { ExpenseTextView(text = "Enter amount") },
+            placeholder = { ExpenseTextView(text = "Valor") },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Color.Black,
                 unfocusedBorderColor = Color.Black,
@@ -250,7 +249,7 @@ fun DataForm(
 
         Spacer(modifier = Modifier.size(24.dp))
 
-        TitleComponent("Date")
+        TitleComponent("Data")
         OutlinedTextField(
             value = if (date.longValue == 0L) "" else Utils.formatDateToHumanReadableForm(date.longValue),
             onValueChange = {},
@@ -263,7 +262,7 @@ fun DataForm(
                 disabledTextColor = Color.Black,
                 disabledPlaceholderColor = Color.Black,
             ),
-            placeholder = { ExpenseTextView(text = "Select date") }
+            placeholder = { ExpenseTextView(text = "Selecione a Data") }
         )
 
         Spacer(modifier = Modifier.size(24.dp))

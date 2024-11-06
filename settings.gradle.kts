@@ -16,9 +16,9 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven("https://jitpack.io")
     }
 }
 
-rootProject.name = "pageApp"
+rootProject.name = "Expense Tracker Android"
 include(":app")
- 

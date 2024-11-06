@@ -107,7 +107,7 @@ fun AddExpense(
                             viewModel.onEvent(AddExpenseUiEvent.OnBackPressed)
                         })
                 ExpenseTextView(
-                    text = "Add ${if (isIncome) "Income" else "Expense"}",
+                    text = "${if (isIncome) "Receita" else "Despesa"}",
                     style = Typography.titleLarge,
                     color = Color.White,
                     modifier = Modifier
@@ -179,7 +179,7 @@ fun DataForm(
         mutableStateOf(false)
     }
     val type = remember {
-        mutableStateOf(if (isIncome) "Income" else "Expense")
+        mutableStateOf(if (isIncome) "Receita" else "Despesa")
     }
     Column(
         modifier = modifier
@@ -232,16 +232,17 @@ fun DataForm(
             value = amount.value,
             onValueChange = { newValue ->
                 amount.value = newValue.filter { it.isDigit() || it == '.' }
-            }, textStyle = TextStyle(color = Color.Black),
+            },
+            textStyle = TextStyle(color = Color.Black),
             visualTransformation = { text ->
-                val out = "$" + text.text
+                val out = "R$" + text.text
                 val currencyOffsetTranslator = object : OffsetMapping {
                     override fun originalToTransformed(offset: Int): Int {
-                        return offset + 1
+                        return offset + 2
                     }
 
                     override fun transformedToOriginal(offset: Int): Int {
-                        return if (offset > 0) offset - 1 else 0
+                        return if (offset > 1) offset - 2 else 0 
                     }
                 }
 
@@ -253,7 +254,8 @@ fun DataForm(
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Color.Black,
                 unfocusedBorderColor = Color.Black,
-                disabledBorderColor = Color.Black, disabledTextColor = Color.Black,
+                disabledBorderColor = Color.Black,
+                disabledTextColor = Color.Black,
                 disabledPlaceholderColor = Color.Black,
                 focusedTextColor = Color.Black,
             )
@@ -287,7 +289,7 @@ fun DataForm(
             }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp)
         ) {
             ExpenseTextView(
-                text = "Add ${if (isIncome) "Income" else "Expense"}",
+                text = "Adicionar",
                 fontSize = 14.sp,
                 color = Color.White
             )
@@ -312,11 +314,11 @@ fun ExpenseDatePickerDialog(
     val selectedDate = datePickerState.selectedDateMillis ?: 0L
     DatePickerDialog(onDismissRequest = { onDismiss() }, confirmButton = {
         TextButton(onClick = { onDateSelected(selectedDate) }) {
-            ExpenseTextView(text = "Confirm")
+            ExpenseTextView(text = "Confirmar")
         }
     }, dismissButton = {
         TextButton(onClick = { onDateSelected(selectedDate) }) {
-            ExpenseTextView(text = "Cancel")
+            ExpenseTextView(text = "Cancelar")
         }
     }) {
         DatePicker(state = datePickerState)

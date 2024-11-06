@@ -21,7 +21,7 @@ object Utils {
         return dateFormatter.format(dateInMillis)
     }
 
-    fun formatCurrency(amount: Double, locale: Locale = Locale.US): String {
+    fun formatCurrency(amount: Double, locale: Locale = Locale("pt", "BR")): String {
         val currencyFormatter = NumberFormat.getCurrencyInstance(locale)
         return currencyFormatter.format(amount)
     }
@@ -57,7 +57,7 @@ object Utils {
         } catch (e: ParseException) {
             e.printStackTrace()
         }
-        println("Today is $date")
+        println("hoje é $date")
         return date.time
     }
 

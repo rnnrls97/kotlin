@@ -40,7 +40,7 @@ class HomeViewModel @Inject constructor(val dao: ExpenseDao) : BaseViewModel() {
     fun getBalance(list: List<ExpenseEntity>): String {
         var balance = 0.0
         for (expense in list) {
-            if (expense.type == "Income") {
+            if (expense.type == "Receita") {
                 balance += expense.amount
             } else {
                 balance -= expense.amount
@@ -52,7 +52,7 @@ class HomeViewModel @Inject constructor(val dao: ExpenseDao) : BaseViewModel() {
     fun getTotalExpense(list: List<ExpenseEntity>): String {
         var total = 0.0
         for (expense in list) {
-            if (expense.type != "Income") {
+            if (expense.type != "Receita") {
                 total += expense.amount
             }
         }
@@ -63,7 +63,7 @@ class HomeViewModel @Inject constructor(val dao: ExpenseDao) : BaseViewModel() {
     fun getTotalIncome(list: List<ExpenseEntity>): String {
         var totalIncome = 0.0
         for (expense in list) {
-            if (expense.type == "Income") {
+            if (expense.type == "Receita") {
                 totalIncome += expense.amount
             }
         }

@@ -99,23 +99,6 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 }) {
-                Column(modifier = Modifier.align(Alignment.CenterStart)) {
-                    ExpenseTextView(
-                        text = "Good Afternoon",
-                        style = Typography.bodyMedium,
-                        color = Color.White
-                    )
-                    ExpenseTextView(
-                        text = "CodeWithFK",
-                        style = Typography.titleLarge,
-                        color = Color.White
-                    )
-                }
-                Image(
-                    painter = painterResource(id = R.drawable.ic_notification),
-                    contentDescription = null,
-                    modifier = Modifier.align(Alignment.CenterEnd)
-                )
             }
 
             val state = viewModel.expenses.collectAsState(initial = emptyList())
@@ -189,7 +172,7 @@ fun MultiFloatingActionButton(
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_income),
-                            contentDescription = "Add Income",
+                            contentDescription = "Adicionar",
                             tint = Color.White
                         )
                     }
@@ -205,7 +188,7 @@ fun MultiFloatingActionButton(
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_expense),
-                            contentDescription = "Add Expense",
+                            contentDescription = "Adicionar",
                             tint = Color.White
                         )
                     }
@@ -254,7 +237,7 @@ fun CardItem(
         ) {
             Column {
                 ExpenseTextView(
-                    text = "Total Balance",
+                    text = "Carteira",
                     style = Typography.titleMedium,
                     color = Color.White
                 )
@@ -263,11 +246,6 @@ fun CardItem(
                     text = balance, style = Typography.headlineLarge, color = Color.White,
                 )
             }
-            Image(
-                painter = painterResource(id = R.drawable.dots_menu),
-                contentDescription = null,
-                modifier = Modifier.align(Alignment.CenterEnd)
-            )
         }
 
         Box(
@@ -278,7 +256,7 @@ fun CardItem(
             CardRowItem(
                 modifier = Modifier
                     .align(Alignment.CenterStart),
-                title = "Income",
+                title = "Receita",
                 amount = income,
                 imaget = R.drawable.ic_income
             )
@@ -286,7 +264,7 @@ fun CardItem(
             CardRowItem(
                 modifier = Modifier
                     .align(Alignment.CenterEnd),
-                title = "Expense",
+                title = "Despesa",
                 amount = expense,
                 imaget = R.drawable.ic_expense
             )
@@ -300,7 +278,7 @@ fun CardItem(
 fun TransactionList(
     modifier: Modifier,
     list: List<ExpenseEntity>,
-    title: String = "Recent Transactions",
+    title: String = "Transações Recentes",
     onSeeAllClicked: () -> Unit
 ) {
     LazyColumn(modifier = modifier.padding(horizontal = 16.dp)) {
@@ -311,9 +289,9 @@ fun TransactionList(
                         text = title,
                         style = Typography.titleLarge,
                     )
-                    if (title == "Recent Transactions") {
+                    if (title == "Transações Recentes") {
                         ExpenseTextView(
-                            text = "See all",
+                            text = "Ver Todos",
                             style = Typography.bodyMedium,
                             modifier = Modifier
                                 .align(Alignment.CenterEnd)
@@ -329,14 +307,14 @@ fun TransactionList(
         items(items = list,
             key = { item -> item.id ?: 0 }) { item ->
             val icon = Utils.getItemIcon(item)
-            val amount = if (item.type == "Income") item.amount else item.amount * -1
+            val amount = if (item.type == "Receita") item.amount else item.amount * -1
 
             TransactionItem(
                 title = item.title,
                 amount = Utils.formatCurrency(amount),
                 icon = icon,
                 date = Utils.formatStringDateToMonthDayYear(item.date),
-                color = if (item.type == "Income") Green else Red,
+                color = if (item.type == "Receita") Green else Red,
                 Modifier
             )
         }

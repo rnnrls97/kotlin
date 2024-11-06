@@ -48,8 +48,8 @@ fun TransactionListScreen(navController: NavController, viewModel: HomeViewModel
     var menuExpanded by remember { mutableStateOf(false) }
 
     val filteredTransactions = when (filterType) {
-        "Expense" -> state.value.filter { it.type == "Expense" }
-        "Income" -> state.value.filter { it.type == "Income" }
+        "Despesa" -> state.value.filter { it.type == "Despesa" }
+        "Receita" -> state.value.filter { it.type == "Receita" }
         else -> state.value
     }
 
@@ -116,7 +116,7 @@ fun TransactionListScreen(navController: NavController, viewModel: HomeViewModel
                         Column {
                             // Type Filter Dropdown
                             ExpenseDropDown(
-                                listOfItems = listOf("All", "Expense", "Income"),
+                                listOfItems = listOf("All", "Despesa", "Receita"),
                                 onItemSelected = { selected ->
                                     filterType = selected
                                     menuExpanded = false // Close menu after selection
@@ -143,7 +143,7 @@ fun TransactionListScreen(navController: NavController, viewModel: HomeViewModel
                         amount = item.amount.toString(),
                         icon = icon!!,
                         date = item.date,
-                        color = if (item.type == "Income") Color.Green else Color.Red,
+                        color = if (item.type == "Receita") Color.Green else Color.Red,
                         Modifier.animateItemPlacement(tween(100))
                     )
                 }

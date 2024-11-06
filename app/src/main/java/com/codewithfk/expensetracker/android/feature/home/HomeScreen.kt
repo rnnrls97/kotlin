@@ -337,12 +337,6 @@ fun TransactionItem(
             .padding(vertical = 8.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Image(
-                painter = painterResource(id = icon),
-                contentDescription = null,
-                modifier = Modifier.size(51.dp)
-            )
-            Spacer(modifier = Modifier.size(8.dp))
             Column {
                 ExpenseTextView(text = title, fontSize = 16.sp, fontWeight = FontWeight.Medium)
                 Spacer(modifier = Modifier.size(6.dp))

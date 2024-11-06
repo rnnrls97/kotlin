@@ -114,39 +114,6 @@ fun AddExpense(
                         .padding(16.dp)
                         .align(Alignment.Center)
                 )
-                Box(modifier = Modifier.align(Alignment.CenterEnd)) {
-                    Image(
-                        painter = painterResource(id = R.drawable.dots_menu),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .clickable {
-                                viewModel.onEvent(AddExpenseUiEvent.OnMenuClicked)
-                            }
-                    )
-                    DropdownMenu(
-                        expanded = menuExpanded.value,
-                        onDismissRequest = { menuExpanded.value = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { ExpenseTextView(text = "Profile") },
-                            onClick = {
-                                menuExpanded.value = false
-                                // Navigate to profile screen
-                                // navController.navigate("profile_route")
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { ExpenseTextView(text = "Settings") },
-                            onClick = {
-                                menuExpanded.value = false
-                                // Navigate to settings screen
-                                // navController.navigate("settings_route")
-                            }
-                        )
-                    }
-                }
-
             }
             DataForm(modifier = Modifier.constrainAs(card) {
                 top.linkTo(nameRow.bottom)

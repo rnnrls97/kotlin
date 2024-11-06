@@ -181,53 +181,40 @@ fun DataForm(
     val type = remember {
         mutableStateOf(if (isIncome) "Receita" else "Despesa")
     }
+
     Column(
         modifier = modifier
             .padding(16.dp)
             .fillMaxWidth()
             .shadow(16.dp)
-            .clip(
-                RoundedCornerShape(16.dp)
-            )
+            .clip(RoundedCornerShape(16.dp))
             .background(Color.White)
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        TitleComponent(title = "name")
-        ExpenseDropDown(
-            if (isIncome) listOf(
-                "Paypal",
-                "Salary",
-                "Freelance",
-                "Investments",
-                "Bonus",
-                "Rental Income",
-                "Other Income"
-            ) else listOf(
-                "Grocery",
-                "Netflix",
-                "Rent",
-                "Paypal",
-                "Starbucks",
-                "Shopping",
-                "Transport",
-                "Utilities",
-                "Dining Out",
-                "Entertainment",
-                "Healthcare",
-                "Insurance",
-                "Subscriptions",
-                "Education",
-                "Debt Payments",
-                "Gifts & Donations",
-                "Travel",
-                "Other Expenses"
-            ),
-            onItemSelected = {
-                name.value = it
-            })
+        TitleComponent(title = "Name")
+        // Text input for 'name', allowing any string value
+        OutlinedTextField(
+            value = name.value,
+            onValueChange = { newValue ->
+                name.value = newValue
+            },
+            textStyle = TextStyle(color = Color.Black),
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { ExpenseTextView(text = "Enter name") },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Black,
+                unfocusedBorderColor = Color.Black,
+                disabledBorderColor = Color.Black,
+                disabledTextColor = Color.Black,
+                disabledPlaceholderColor = Color.Black,
+                focusedTextColor = Color.Black,
+            )
+        )
+
         Spacer(modifier = Modifier.size(24.dp))
-        TitleComponent("amount")
+
+        TitleComponent("Amount")
         OutlinedTextField(
             value = amount.value,
             onValueChange = { newValue ->
@@ -238,11 +225,11 @@ fun DataForm(
                 val out = "R$" + text.text
                 val currencyOffsetTranslator = object : OffsetMapping {
                     override fun originalToTransformed(offset: Int): Int {
-                        return offset + 2
+                        return offset + 2 // Adjust for the "R$" prefix
                     }
 
                     override fun transformedToOriginal(offset: Int): Int {
-                        return if (offset > 1) offset - 2 else 0 
+                        return if (offset > 1) offset - 2 else 0 // Adjust for the "R$" prefix
                     }
                 }
 
@@ -260,22 +247,27 @@ fun DataForm(
                 focusedTextColor = Color.Black,
             )
         )
+
         Spacer(modifier = Modifier.size(24.dp))
-        TitleComponent("date")
-        OutlinedTextField(value = if (date.longValue == 0L) "" else Utils.formatDateToHumanReadableForm(
-            date.longValue
-        ),
+
+        TitleComponent("Date")
+        OutlinedTextField(
+            value = if (date.longValue == 0L) "" else Utils.formatDateToHumanReadableForm(date.longValue),
             onValueChange = {},
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { dateDialogVisibility.value = true },
             enabled = false,
             colors = OutlinedTextFieldDefaults.colors(
-                disabledBorderColor = Color.Black, disabledTextColor = Color.Black,
+                disabledBorderColor = Color.Black,
+                disabledTextColor = Color.Black,
                 disabledPlaceholderColor = Color.Black,
             ),
-            placeholder = { ExpenseTextView(text = "Select date") })
+            placeholder = { ExpenseTextView(text = "Select date") }
+        )
+
         Spacer(modifier = Modifier.size(24.dp))
+
         Button(
             onClick = {
                 val model = ExpenseEntity(
@@ -286,7 +278,9 @@ fun DataForm(
                     type.value
                 )
                 onAddExpenseClick(model)
-            }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp)
         ) {
             ExpenseTextView(
                 text = "Adicionar",
@@ -295,6 +289,7 @@ fun DataForm(
             )
         }
     }
+
     if (dateDialogVisibility.value) {
         ExpenseDatePickerDialog(onDateSelected = {
             date.longValue = it
@@ -304,6 +299,7 @@ fun DataForm(
         })
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

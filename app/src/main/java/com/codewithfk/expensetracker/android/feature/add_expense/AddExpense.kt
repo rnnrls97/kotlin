@@ -2,6 +2,7 @@
 
 package com.codewithfk.expensetracker.android.feature.add_expense
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,6 +33,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,9 +70,20 @@ import com.codewithfk.expensetracker.android.widget.ExpenseTextView
 fun AddExpense(
     navController: NavController,
     isIncome: Boolean,
+    transactionId: Int? = 1, // New parameter for editing
     viewModel: AddExpenseViewModel = hiltViewModel()
 ) {
     val menuExpanded = remember { mutableStateOf(false) }
+
+    print(transactionId)
+
+    LaunchedEffect(transactionId) {
+        if (transactionId != null) {
+
+            viewModel.loadTransaction(transactionId) // Load transaction if editing
+        }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->
             when (event) {
@@ -78,10 +91,13 @@ fun AddExpense(
                 AddExpenseNavigationEvent.MenuOpenedClicked -> {
                     menuExpanded.value = true
                 }
-                else->{}
+                else -> {}
             }
         }
     }
+
+    val transactionData = viewModel.transactionData.collectAsState().value
+
     Surface(modifier = Modifier.fillMaxSize()) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (nameRow, card, topBar) = createRefs()
@@ -103,25 +119,26 @@ fun AddExpense(
                 Image(painter = painterResource(id = R.drawable.ic_back), contentDescription = null,
                     modifier = Modifier
                         .align(Alignment.CenterStart)
-                        .clickable {
-                            viewModel.onEvent(AddExpenseUiEvent.OnBackPressed)
-                        })
+                        .clickable { viewModel.onEvent(AddExpenseUiEvent.OnBackPressed) })
                 ExpenseTextView(
                     text = "${if (isIncome) "Receita" else "Despesa"}",
                     style = Typography.titleLarge,
                     color = Color.White,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .align(Alignment.Center)
+                    modifier = Modifier.padding(16.dp).align(Alignment.Center)
                 )
             }
-            DataForm(modifier = Modifier.constrainAs(card) {
-                top.linkTo(nameRow.bottom)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-            }, onAddExpenseClick = {
-                viewModel.onEvent(AddExpenseUiEvent.OnAddExpenseClicked(it))
-            }, isIncome)
+            DataForm(
+                modifier = Modifier.constrainAs(card) {
+                    top.linkTo(nameRow.bottom)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                },
+                onAddExpenseClick = {
+                    viewModel.onEvent(AddExpenseUiEvent.OnAddExpenseClicked(it))
+                },
+                isIncome = isIncome,
+                transactionData = transactionData // Prefill form with existing data if editing
+            )
         }
     }
 }
@@ -130,24 +147,14 @@ fun AddExpense(
 fun DataForm(
     modifier: Modifier,
     onAddExpenseClick: (model: ExpenseEntity) -> Unit,
-    isIncome: Boolean
+    isIncome: Boolean,
+    transactionData: ExpenseEntity? = null // Optional parameter for existing data
 ) {
-
-    val name = remember {
-        mutableStateOf("")
-    }
-    val amount = remember {
-        mutableStateOf("")
-    }
-    val date = remember {
-        mutableLongStateOf(0L)
-    }
-    val dateDialogVisibility = remember {
-        mutableStateOf(false)
-    }
-    val type = remember {
-        mutableStateOf(if (isIncome) "Receita" else "Despesa")
-    }
+    val name = remember { mutableStateOf(transactionData?.title ?: "") }
+    val amount = remember { mutableStateOf(transactionData?.amount?.toString() ?: "") }
+    val date = remember { mutableLongStateOf(transactionData?.date?.let { Utils.parseDate(it) as Long } ?: 0L) }
+    val type = remember { mutableStateOf(transactionData?.type ?: if (isIncome) "Receita" else "Despesa") }
+    val dateDialogVisibility = remember { mutableStateOf(false) } // Add this line
 
     Column(
         modifier = modifier

@@ -73,4 +73,10 @@ object Utils {
         }
     }
 
+    fun parseDate(dateString: String): Long {
+        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val date = formatter.parse(dateString)
+        return date?.time ?: 0L
+    }
+
 }

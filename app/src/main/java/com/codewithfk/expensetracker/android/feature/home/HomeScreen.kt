@@ -68,15 +68,12 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                 HomeNavigationEvent.NavigateToSeeAll -> {
                     navController.navigate("/all_transactions")
                 }
-
                 HomeNavigationEvent.NavigateToAddIncome -> {
                     navController.navigate("/add_income")
                 }
-
                 HomeNavigationEvent.NavigateToAddExpense -> {
                     navController.navigate("/add_exp")
                 }
-
                 else -> {}
             }
         }
@@ -98,8 +95,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                     top.linkTo(parent.top)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                }) {
-            }
+                })
 
             val state = viewModel.expenses.collectAsState(initial = emptyList())
             val expense = viewModel.getTotalExpense(state.value)
@@ -122,8 +118,13 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                         end.linkTo(parent.end)
                         bottom.linkTo(parent.bottom)
                         height = Dimension.fillToConstraints
-                    }, list = state.value, onSeeAllClicked = {
+                    },
+                list = state.value,
+                onSeeAllClicked = {
                     viewModel.onEvent(HomeUiEvent.OnSeeAllClicked)
+                },
+                onItemClicked = { item -> // New callback for item click
+                    navController.navigate("/edit_expense/${item.id}")
                 }
             )
 
@@ -133,7 +134,8 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                     .constrainAs(add) {
                         bottom.linkTo(parent.bottom)
                         end.linkTo(parent.end)
-                    }, contentAlignment = Alignment.BottomEnd
+                    },
+                contentAlignment = Alignment.BottomEnd
             ) {
                 MultiFloatingActionButton(modifier = Modifier, {
                     viewModel.onEvent(HomeUiEvent.OnAddExpenseClicked)
@@ -279,7 +281,8 @@ fun TransactionList(
     modifier: Modifier,
     list: List<ExpenseEntity>,
     title: String = "Transações Recentes",
-    onSeeAllClicked: () -> Unit
+    onSeeAllClicked: () -> Unit,
+    onItemClicked: (ExpenseEntity) -> Unit // Callback for item click
 ) {
     LazyColumn(modifier = modifier.padding(horizontal = 16.dp)) {
         item {
@@ -295,17 +298,14 @@ fun TransactionList(
                             style = Typography.bodyMedium,
                             modifier = Modifier
                                 .align(Alignment.CenterEnd)
-                                .clickable {
-                                    onSeeAllClicked.invoke()
-                                }
+                                .clickable { onSeeAllClicked.invoke() }
                         )
                     }
                 }
                 Spacer(modifier = Modifier.size(12.dp))
             }
         }
-        items(items = list,
-            key = { item -> item.id ?: 0 }) { item ->
+        items(items = list, key = { item -> item.id ?: 0 }) { item ->
             val icon = Utils.getItemIcon(item)
             val amount = if (item.type == "Receita") item.amount else item.amount * -1
 
@@ -315,7 +315,7 @@ fun TransactionList(
                 icon = icon,
                 date = Utils.formatStringDateToMonthDayYear(item.date),
                 color = if (item.type == "Receita") Green else Red,
-                Modifier
+                Modifier.clickable { onItemClicked(item) } // Trigger on item click
             )
         }
     }

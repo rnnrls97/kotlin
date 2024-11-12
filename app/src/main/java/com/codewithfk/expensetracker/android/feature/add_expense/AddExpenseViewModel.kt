@@ -9,13 +9,17 @@ import com.codewithfk.expensetracker.android.data.dao.ExpenseDao
 import com.codewithfk.expensetracker.android.data.model.ExpenseEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class AddExpenseViewModel @Inject constructor(val dao: ExpenseDao) : BaseViewModel() {
-
+    private val _transactionData = MutableStateFlow<ExpenseEntity?>(null)
+    val transactionData: StateFlow<ExpenseEntity?> = _transactionData.asStateFlow()
 
     suspend fun addExpense(expenseEntity: ExpenseEntity): Boolean {
         return try {
@@ -52,6 +56,16 @@ class AddExpenseViewModel @Inject constructor(val dao: ExpenseDao) : BaseViewMod
             }
         }
     }
+
+    fun loadTransaction(transactionId: Int) {
+        viewModelScope.launch {
+            val transaction = withContext(Dispatchers.IO) {
+                dao.getTransactionById(transactionId)
+            }
+            _transactionData.value = transaction
+        }
+    }
+    
 }
 
 sealed class AddExpenseUiEvent : UiEvent() {

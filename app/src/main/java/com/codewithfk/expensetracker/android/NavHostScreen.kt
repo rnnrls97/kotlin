@@ -16,10 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.codewithfk.expensetracker.android.feature.add_expense.AddExpense
 import com.codewithfk.expensetracker.android.feature.home.HomeScreen
 import com.codewithfk.expensetracker.android.feature.stats.StatsScreen
@@ -70,6 +72,13 @@ fun NavHostScreen() {
             composable(route = "/all_transactions") {
                 bottomBarVisibility = true // Show the bottom bar if you want it visible
                 TransactionListScreen(navController)
+            }
+            composable(
+                route = "/edit_expense/{transactionId}",
+                arguments = listOf(navArgument("transactionId") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val transactionId = backStackEntry.arguments?.getInt("transactionId") ?: 0
+                AddExpense(navController = navController, isIncome = false, transactionId = transactionId)
             }
         }
     }

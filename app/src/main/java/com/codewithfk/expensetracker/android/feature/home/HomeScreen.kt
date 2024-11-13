@@ -1,10 +1,10 @@
 package com.codewithfk.expensetracker.android.feature.home
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,11 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -49,7 +46,6 @@ import com.codewithfk.expensetracker.android.data.model.ExpenseEntity
 import com.codewithfk.expensetracker.android.ui.theme.Zinc
 import com.codewithfk.expensetracker.android.widget.ExpenseTextView
 import com.codewithfk.expensetracker.android.R
-import com.codewithfk.expensetracker.android.base.AddExpenseNavigationEvent
 import com.codewithfk.expensetracker.android.base.HomeNavigationEvent
 import com.codewithfk.expensetracker.android.base.NavigationEvent
 import com.codewithfk.expensetracker.android.ui.theme.Green
@@ -65,15 +61,9 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
         viewModel.navigationEvent.collect { event ->
             when (event) {
                 NavigationEvent.NavigateBack -> navController.popBackStack()
-                HomeNavigationEvent.NavigateToSeeAll -> {
-                    navController.navigate("/all_transactions")
-                }
-                HomeNavigationEvent.NavigateToAddIncome -> {
-                    navController.navigate("/add_income")
-                }
-                HomeNavigationEvent.NavigateToAddExpense -> {
-                    navController.navigate("/add_exp")
-                }
+                HomeNavigationEvent.NavigateToSeeAll -> navController.navigate("/all_transactions")
+                HomeNavigationEvent.NavigateToAddIncome -> navController.navigate("/add_income")
+                HomeNavigationEvent.NavigateToAddExpense -> navController.navigate("/add_exp")
                 else -> {}
             }
         }
@@ -82,12 +72,15 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
     Surface(modifier = Modifier.fillMaxSize()) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (nameRow, list, card, topBar, add) = createRefs()
-            Image(painter = painterResource(id = R.drawable.ic_topbar), contentDescription = null,
+            Image(
+                painter = painterResource(id = R.drawable.ic_topbar),
+                contentDescription = null,
                 modifier = Modifier.constrainAs(topBar) {
                     top.linkTo(parent.top)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                })
+                }
+            )
             Box(modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 64.dp, start = 16.dp, end = 16.dp)
@@ -123,8 +116,11 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                 onSeeAllClicked = {
                     viewModel.onEvent(HomeUiEvent.OnSeeAllClicked)
                 },
-                onItemClicked = { item -> // New callback for item click
+                onItemClicked = { item ->
                     navController.navigate("/edit_expense/${item.id}")
+                },
+                onItemLongPressed = { item ->
+                    viewModel.deleteTransaction(item)
                 }
             )
 
@@ -282,7 +278,8 @@ fun TransactionList(
     list: List<ExpenseEntity>,
     title: String = "Transações Recentes",
     onSeeAllClicked: () -> Unit,
-    onItemClicked: (ExpenseEntity) -> Unit // Callback for item click
+    onItemClicked: (ExpenseEntity) -> Unit,
+    onItemLongPressed: (ExpenseEntity) -> Unit // Added long press callback
 ) {
     LazyColumn(modifier = modifier.padding(horizontal = 16.dp)) {
         item {
@@ -315,7 +312,13 @@ fun TransactionList(
                 icon = icon,
                 date = Utils.formatStringDateToMonthDayYear(item.date),
                 color = if (item.type == "Receita") Green else Red,
-                Modifier.clickable { onItemClicked(item) } // Trigger on item click
+                modifier = Modifier
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onLongPress = { onItemLongPressed(item) },
+                            onTap = { onItemClicked(item) }
+                        )
+                    }
             )
         }
     }

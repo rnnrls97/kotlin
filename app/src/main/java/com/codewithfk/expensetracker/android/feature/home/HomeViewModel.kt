@@ -69,6 +69,13 @@ class HomeViewModel @Inject constructor(val dao: ExpenseDao) : BaseViewModel() {
         }
         return Utils.formatCurrency(totalIncome)
     }
+
+    // New function to delete a transaction
+    fun deleteTransaction(expense: ExpenseEntity) {
+        viewModelScope.launch {
+            dao.deleteExpense(expense)
+        }
+    }
 }
 
 sealed class HomeUiEvent : UiEvent() {

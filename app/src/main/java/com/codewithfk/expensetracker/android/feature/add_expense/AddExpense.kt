@@ -70,17 +70,14 @@ import com.codewithfk.expensetracker.android.widget.ExpenseTextView
 fun AddExpense(
     navController: NavController,
     isIncome: Boolean,
-    transactionId: Int? = 1, // New parameter for editing
+    transactionId: Int? = null, // New parameter for editing
     viewModel: AddExpenseViewModel = hiltViewModel()
 ) {
     val menuExpanded = remember { mutableStateOf(false) }
 
-    print(transactionId)
-
     LaunchedEffect(transactionId) {
         if (transactionId != null) {
-
-            viewModel.loadTransaction(transactionId) // Load transaction if editing
+           viewModel.loadTransaction(transactionId) // Load transaction if editing
         }
     }
 
@@ -150,11 +147,22 @@ fun DataForm(
     isIncome: Boolean,
     transactionData: ExpenseEntity? = null // Optional parameter for existing data
 ) {
-    val name = remember { mutableStateOf(transactionData?.title ?: "") }
-    val amount = remember { mutableStateOf(transactionData?.amount?.toString() ?: "") }
-    val date = remember { mutableLongStateOf(transactionData?.date?.let { Utils.parseDate(it) as Long } ?: 0L) }
-    val type = remember { mutableStateOf(transactionData?.type ?: if (isIncome) "Receita" else "Despesa") }
-    val dateDialogVisibility = remember { mutableStateOf(false) } // Add this line
+    // Initialize state variables with default values
+    val name = remember { mutableStateOf("") }
+    val amount = remember { mutableStateOf("") }
+    val date = remember { mutableLongStateOf(0L) }
+    val type = remember { mutableStateOf(if (isIncome) "Receita" else "Despesa") }
+    val dateDialogVisibility = remember { mutableStateOf(false) }
+
+    // Update state variables when transactionData changes
+    LaunchedEffect(transactionData) {
+        if (transactionData != null) {
+            name.value = transactionData.title
+            amount.value = transactionData.amount.toString()
+            date.value = transactionData.date?.let { Utils.parseDate(it) as Long } ?: 0L
+            type.value = transactionData.type
+        }
+    }
 
     Column(
         modifier = modifier
@@ -244,11 +252,11 @@ fun DataForm(
         Button(
             onClick = {
                 val model = ExpenseEntity(
-                    null,
-                    name.value,
-                    amount.value.toDoubleOrNull() ?: 0.0,
-                    Utils.formatDateToHumanReadableForm(date.longValue),
-                    type.value
+                    id = transactionData?.id, // Use the existing ID if editing
+                    title = name.value,
+                    amount = amount.value.toDoubleOrNull() ?: 0.0,
+                    date = Utils.formatDateToHumanReadableForm(date.longValue),
+                    type = type.value
                 )
                 onAddExpenseClick(model)
             },
@@ -256,7 +264,7 @@ fun DataForm(
             shape = RoundedCornerShape(8.dp)
         ) {
             ExpenseTextView(
-                text = "Adicionar",
+                text = if (transactionData != null) "Editar" else "Adicionar", // Show "Edit" or "Add" based on the context
                 fontSize = 14.sp,
                 color = Color.White
             )

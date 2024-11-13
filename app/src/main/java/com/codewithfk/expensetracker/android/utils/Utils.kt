@@ -10,11 +10,7 @@ import java.util.Locale
 
 
 object Utils {
-
-    fun formatDateToHumanReadableForm(dateInMillis: Long): String {
-        val dateFormatter = SimpleDateFormat("dd/MM/YYYY", Locale.getDefault())
-        return dateFormatter.format(dateInMillis)
-    }
+    private val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
     fun formatDateForChart(dateInMillis: Long): String {
         val dateFormatter = SimpleDateFormat("dd-MMM", Locale.getDefault())
@@ -57,7 +53,7 @@ object Utils {
         } catch (e: ParseException) {
             e.printStackTrace()
         }
-        println("hoje é $date")
+        
         return date.time
     }
 
@@ -74,9 +70,18 @@ object Utils {
     }
 
     fun parseDate(dateString: String): Long {
-        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val date = formatter.parse(dateString)
-        return date?.time ?: 0L
+        return try {
+            dateFormat.parse(dateString)?.time ?: 0L
+        } catch (e: ParseException) {
+            throw ParseException("Unparseable date: $dateString", 0)
+        }
+    }
+
+    fun formatDateToHumanReadableForm(dateInMillis: Long): String {
+        return dateFormat.format(Date(dateInMillis))
+    }
+    fun parseStringDate(dateString: String): Long {
+        return dateFormat.parse(dateString)?.time ?: throw ParseException("Unparseable date: $dateString", 0)
     }
 
 }

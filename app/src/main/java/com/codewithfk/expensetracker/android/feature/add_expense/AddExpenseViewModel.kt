@@ -30,25 +30,36 @@ class AddExpenseViewModel @Inject constructor(val dao: ExpenseDao) : BaseViewMod
         }
     }
 
+    suspend fun saveExpense(expenseEntity: ExpenseEntity): Boolean {
+        return try {
+            withContext(Dispatchers.IO) {
+                if (expenseEntity.id == null) {
+                    dao.insertExpense(expenseEntity) // Insert new transaction
+                } else {
+                    dao.updateExpense(expenseEntity) // Update existing transaction
+                }
+            }
+            true
+        } catch (ex: Throwable) {
+            false
+        }
+    }
+
     override fun onEvent(event: UiEvent) {
         when (event) {
             is AddExpenseUiEvent.OnAddExpenseClicked -> {
                 viewModelScope.launch {
-                    withContext(Dispatchers.IO) {
-                        val result = addExpense(event.expenseEntity)
-                        if (result) {
-                            _navigationEvent.emit(NavigationEvent.NavigateBack)
-                        }
+                    val result = saveExpense(event.expenseEntity)
+                    if (result) {
+                        _navigationEvent.emit(NavigationEvent.NavigateBack)
                     }
                 }
             }
-
             is AddExpenseUiEvent.OnBackPressed -> {
                 viewModelScope.launch {
                     _navigationEvent.emit(NavigationEvent.NavigateBack)
                 }
             }
-
             is AddExpenseUiEvent.OnMenuClicked -> {
                 viewModelScope.launch {
                     _navigationEvent.emit(AddExpenseNavigationEvent.MenuOpenedClicked)

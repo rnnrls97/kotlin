@@ -154,7 +154,6 @@ fun DataForm(
     val type = remember { mutableStateOf(if (isIncome) "Receita" else "Despesa") }
     val dateDialogVisibility = remember { mutableStateOf(false) }
 
-    // Update state variables when transactionData changes
     LaunchedEffect(transactionData) {
         if (transactionData != null) {
             name.value = transactionData.title

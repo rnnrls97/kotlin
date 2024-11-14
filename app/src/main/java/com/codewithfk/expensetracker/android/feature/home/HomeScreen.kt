@@ -18,8 +18,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -57,6 +60,10 @@ import com.codewithfk.expensetracker.android.utils.Utils
 
 @Composable
 fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltViewModel()) {
+    val state = viewModel.expenses.collectAsState(initial = emptyList())
+    val (showDialog, setShowDialog) = remember { mutableStateOf(false) }
+    var transactionToDelete by remember { mutableStateOf<ExpenseEntity?>(null) }
+
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->
             when (event) {
@@ -90,7 +97,6 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                     end.linkTo(parent.end)
                 })
 
-            val state = viewModel.expenses.collectAsState(initial = emptyList())
             val expense = viewModel.getTotalExpense(state.value)
             val income = viewModel.getTotalIncome(state.value)
             val balance = viewModel.getBalance(state.value)
@@ -120,9 +126,22 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                     navController.navigate("/edit_expense/${item.id}")
                 },
                 onItemLongPressed = { item ->
-                    viewModel.deleteTransaction(item)
+                    transactionToDelete = item
+                    setShowDialog(true)
                 }
             )
+
+            if (showDialog && transactionToDelete != null) {
+                ConfirmationDialog(
+                    onConfirm = {
+                        viewModel.deleteTransaction(transactionToDelete!!)
+                        setShowDialog(false)
+                    },
+                    onDismiss = {
+                        setShowDialog(false)
+                    }
+                )
+            }
 
             Box(
                 modifier = Modifier
@@ -371,6 +390,29 @@ fun CardRowItem(modifier: Modifier, title: String, amount: String, imaget: Int) 
         Spacer(modifier = Modifier.size(4.dp))
         ExpenseTextView(text = amount, style = Typography.titleLarge, color = Color.White)
     }
+}
+
+@Composable
+fun ConfirmationDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = "Excluir Transação")
+        },
+        text = {
+            Text(text = "Deseja realmente excluir?")
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text("Excluir")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    )
 }
 
 @Preview(showBackground = true)

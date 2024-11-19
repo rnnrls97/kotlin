@@ -7,6 +7,7 @@ import com.codewithfk.expensetracker.android.base.UiEvent
 import com.codewithfk.expensetracker.android.utils.Utils
 import com.codewithfk.expensetracker.android.data.dao.ExpenseDao
 import com.codewithfk.expensetracker.android.data.model.ExpenseEntity
+import com.codewithfk.expensetracker.android.data.model.ExpenseLogEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -74,6 +75,17 @@ class HomeViewModel @Inject constructor(val dao: ExpenseDao) : BaseViewModel() {
     fun deleteTransaction(expense: ExpenseEntity) {
         viewModelScope.launch {
             dao.deleteExpense(expense)
+
+            val log = ExpenseLogEntity(
+                id = expense.id,
+                title = expense.title,
+                amount = expense.amount,
+                date = expense.date,
+                type = expense.type,
+                action = "DELETE",
+                timestamp = System.currentTimeMillis()
+            )
+            dao.insertLog(log)
         }
     }
 }

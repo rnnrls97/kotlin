@@ -3,9 +3,11 @@ package com.codewithfk.expensetracker.android.data.dao
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.codewithfk.expensetracker.android.data.model.ExpenseEntity
+import com.codewithfk.expensetracker.android.data.model.ExpenseLogEntity
 import com.codewithfk.expensetracker.android.data.model.ExpenseSummary
 import kotlinx.coroutines.flow.Flow
 
@@ -26,12 +28,18 @@ interface ExpenseDao {
     @Query("SELECT * FROM expense_table WHERE id = :transactionId")
     suspend fun getTransactionById(transactionId: Int): ExpenseEntity?
 
-    @Insert
-    suspend fun insertExpense(expenseEntity: ExpenseEntity)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertExpense(expenseEntity: ExpenseEntity): Int
 
     @Delete
     suspend fun deleteExpense(expenseEntity: ExpenseEntity)
 
     @Update
     suspend fun updateExpense(expenseEntity: ExpenseEntity)
+
+    @Insert
+    suspend fun insertLog(log: ExpenseLogEntity)
+
+    @Query("SELECT * FROM expense_logs_table ORDER BY timestamp DESC")
+    suspend fun getAllLogs(): List<ExpenseLogEntity>
 }

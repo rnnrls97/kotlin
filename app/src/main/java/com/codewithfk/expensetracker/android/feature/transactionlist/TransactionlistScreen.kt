@@ -77,7 +77,7 @@ fun TransactionListScreen(navController: NavController, viewModel: HomeViewModel
 
                 // Title
                 ExpenseTextView(
-                    text = "Transactions",
+                    text = "Transações",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier

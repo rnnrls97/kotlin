@@ -7,6 +7,7 @@ import com.codewithfk.expensetracker.android.base.NavigationEvent
 import com.codewithfk.expensetracker.android.base.UiEvent
 import com.codewithfk.expensetracker.android.data.dao.ExpenseDao
 import com.codewithfk.expensetracker.android.data.model.ExpenseEntity
+import com.codewithfk.expensetracker.android.data.model.ExpenseLogEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +24,20 @@ class AddExpenseViewModel @Inject constructor(val dao: ExpenseDao) : BaseViewMod
 
     suspend fun addExpense(expenseEntity: ExpenseEntity): Boolean {
         return try {
-            dao.insertExpense(expenseEntity)
+            val expenseId = dao.insertExpense(expenseEntity).toInt()
+            if (expenseId > 0) {
+                val log = ExpenseLogEntity(
+                    id = expenseId,
+                    title = expenseEntity.title,
+                    amount = expenseEntity.amount,
+                    date = expenseEntity.date,
+                    type = expenseEntity.type,
+                    action = "INSERT",
+                    timestamp = System.currentTimeMillis()
+                )
+                dao.insertLog(log)
+            }
+
             true
         } catch (ex: Throwable) {
             false
@@ -34,9 +48,32 @@ class AddExpenseViewModel @Inject constructor(val dao: ExpenseDao) : BaseViewMod
         return try {
             withContext(Dispatchers.IO) {
                 if (expenseEntity.id == null) {
-                    dao.insertExpense(expenseEntity) // Insert new transaction
+                    val expenseId = dao.insertExpense(expenseEntity)
+                    if (expenseId > 0) {
+                        val log = ExpenseLogEntity(
+                            id = expenseId,
+                            title = expenseEntity.title,
+                            amount = expenseEntity.amount,
+                            date = expenseEntity.date,
+                            type = expenseEntity.type,
+                            action = "INSERT",
+                            timestamp = System.currentTimeMillis()
+                        )
+                        dao.insertLog(log)
+                    }
                 } else {
-                    dao.updateExpense(expenseEntity) // Update existing transaction
+                    dao.updateExpense(expenseEntity)
+
+                    val log = ExpenseLogEntity(
+                        id = expenseEntity.id,
+                        title = expenseEntity.title,
+                        amount = expenseEntity.amount,
+                        date = expenseEntity.date,
+                        type = expenseEntity.type,
+                        action = "UPDATE",
+                        timestamp = System.currentTimeMillis()
+                    )
+                    dao.insertLog(log)
                 }
             }
             true

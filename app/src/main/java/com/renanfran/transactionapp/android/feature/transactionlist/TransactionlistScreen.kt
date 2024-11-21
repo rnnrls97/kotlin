@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.renanfran.transactionapp.android.R
-import com.renanfran.transactionapp.android.feature.add_expense.ExpenseDropDown
+import com.renanfran.transactionapp.android.feature.add_transaction.ExpenseDropDown
 import com.renanfran.transactionapp.android.feature.home.TransactionItem
 import com.renanfran.transactionapp.android.utils.Utils
 import com.renanfran.transactionapp.android.feature.home.HomeViewModel

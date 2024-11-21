@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -76,7 +77,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                 NavigationEvent.NavigateBack -> navController.popBackStack()
                 HomeNavigationEvent.NavigateToSeeAll -> navController.navigate("/all_transactions")
                 HomeNavigationEvent.NavigateToAddIncome -> navController.navigate("/add_income")
-                HomeNavigationEvent.NavigateToAddExpense -> navController.navigate("/add_exp")
+                HomeNavigationEvent.NavigateToAddTransaction -> navController.navigate("/add_exp")
                 else -> {}
             }
         }
@@ -109,6 +110,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                 expense = expense,
                 image = randomImageUrl
             )
+            HorizontalDivider(thickness = 2.dp)
             TransactionList( 
                 modifier = Modifier
                     .fillMaxWidth()
@@ -124,7 +126,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                     viewModel.onEvent(HomeUiEvent.OnSeeAllClicked)
                 },
                 onItemClicked = { item ->
-                    navController.navigate("/edit_expense/${item.id}")
+                    navController.navigate("/edit_transaction/${item.id}")
                 },
                 onItemLongPressed = { item ->
                     transactionToDelete = item
@@ -154,7 +156,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                 contentAlignment = Alignment.BottomEnd
             ) {
                 MultiFloatingActionButton(modifier = Modifier, {
-                    viewModel.onEvent(HomeUiEvent.OnAddExpenseClicked)
+                    viewModel.onEvent(HomeUiEvent.OnAddTransactionClicked)
                 }, {
                     viewModel.onEvent(HomeUiEvent.OnAddIncomeClicked)
                 })
@@ -166,7 +168,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
 @Composable
 fun MultiFloatingActionButton(
     modifier: Modifier,
-    onAddExpenseClicked: () -> Unit,
+    onAddTransactionClicked: () -> Unit,
     onAddIncomeClicked: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -200,7 +202,7 @@ fun MultiFloatingActionButton(
                             .size(48.dp)
                             .background(color = Zinc, shape = RoundedCornerShape(12.dp))
                             .clickable {
-                                onAddExpenseClicked.invoke()
+                                onAddTransactionClicked.invoke()
                             },
                         contentAlignment = Alignment.Center
                     ) {
@@ -338,7 +340,7 @@ fun TransactionList(
                     )
                     if (title == "Transações Recentes") {
                         ExpenseTextView(
-                            text = "Ver Todos",
+                            text = "Ver Todas",
                             style = Typography.bodyMedium,
                             modifier = Modifier
                                 .align(Alignment.CenterEnd)
@@ -347,6 +349,7 @@ fun TransactionList(
                     }
                 }
                 Spacer(modifier = Modifier.size(12.dp))
+                HorizontalDivider(thickness = 2.dp)
             }
         }
         items(items = list, key = { item -> item.id ?: 0 }) { item ->

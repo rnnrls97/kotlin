@@ -1,7 +1,7 @@
-package com.renanfran.transactionapp.android.feature.add_expense
+package com.renanfran.transactionapp.android.feature.add_transaction
 
 import androidx.lifecycle.viewModelScope
-import com.renanfran.transactionapp.android.base.AddExpenseNavigationEvent
+import com.renanfran.transactionapp.android.base.AddTransactionNavigationEvent
 import com.renanfran.transactionapp.android.base.BaseViewModel
 import com.renanfran.transactionapp.android.base.NavigationEvent
 import com.renanfran.transactionapp.android.base.UiEvent
@@ -17,11 +17,11 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class AddExpenseViewModel @Inject constructor(val dao: TransactionDao) : BaseViewModel() {
+class AddTransactionViewModel @Inject constructor(val dao: TransactionDao) : BaseViewModel() {
     private val _transactionData = MutableStateFlow<TransactionEntity?>(null)
     val transactionData: StateFlow<TransactionEntity?> = _transactionData.asStateFlow()
 
-    suspend fun addExpense(TransactionEntity: TransactionEntity): Boolean {
+    suspend fun AddTransaction(TransactionEntity: TransactionEntity): Boolean {
         return try {
             dao.insertExpense(TransactionEntity)
             true
@@ -47,7 +47,7 @@ class AddExpenseViewModel @Inject constructor(val dao: TransactionDao) : BaseVie
 
     override fun onEvent(event: UiEvent) {
         when (event) {
-            is AddExpenseUiEvent.OnAddExpenseClicked -> {
+            is AddTransactionUiEvent.OnAddTransactionClicked -> {
                 viewModelScope.launch {
                     val result = saveExpense(event.TransactionEntity)
                     if (result) {
@@ -55,14 +55,14 @@ class AddExpenseViewModel @Inject constructor(val dao: TransactionDao) : BaseVie
                     }
                 }
             }
-            is AddExpenseUiEvent.OnBackPressed -> {
+            is AddTransactionUiEvent.OnBackPressed -> {
                 viewModelScope.launch {
                     _navigationEvent.emit(NavigationEvent.NavigateBack)
                 }
             }
-            is AddExpenseUiEvent.OnMenuClicked -> {
+            is AddTransactionUiEvent.OnMenuClicked -> {
                 viewModelScope.launch {
-                    _navigationEvent.emit(AddExpenseNavigationEvent.MenuOpenedClicked)
+                    _navigationEvent.emit(AddTransactionNavigationEvent.MenuOpenedClicked)
                 }
             }
         }
@@ -79,10 +79,10 @@ class AddExpenseViewModel @Inject constructor(val dao: TransactionDao) : BaseVie
     
 }
 
-sealed class AddExpenseUiEvent : UiEvent() {
-    data class OnAddExpenseClicked(val TransactionEntity: TransactionEntity) : AddExpenseUiEvent()
-    object OnBackPressed : AddExpenseUiEvent()
-    object OnMenuClicked : AddExpenseUiEvent()
+sealed class AddTransactionUiEvent : UiEvent() {
+    data class OnAddTransactionClicked(val TransactionEntity: TransactionEntity) : AddTransactionUiEvent()
+    object OnBackPressed : AddTransactionUiEvent()
+    object OnMenuClicked : AddTransactionUiEvent()
 }
 
 

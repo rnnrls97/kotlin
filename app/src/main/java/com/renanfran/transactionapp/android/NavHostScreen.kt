@@ -22,7 +22,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.renanfran.transactionapp.android.feature.add_expense.AddExpense
+import com.renanfran.transactionapp.android.feature.add_transaction.AddTransaction
 import com.renanfran.transactionapp.android.feature.home.HomeScreen
 import com.renanfran.transactionapp.android.feature.stats.StatsScreen
 import com.renanfran.transactionapp.android.feature.transactionlist.TransactionListScreen
@@ -58,11 +58,11 @@ fun NavHostScreen() {
 
             composable(route = "/add_income") {
                 bottomBarVisibility = false
-                AddExpense(navController, isIncome = true)
+                AddTransaction(navController, isIncome = true)
             }
             composable(route = "/add_exp") {
                 bottomBarVisibility = false
-                AddExpense(navController, isIncome = false)
+                AddTransaction(navController, isIncome = false)
             }
 
             composable(route = "/stats") {
@@ -74,11 +74,11 @@ fun NavHostScreen() {
                 TransactionListScreen(navController)
             }
             composable(
-                route = "/edit_expense/{transactionId}",
+                route = "/edit_transaction/{transactionId}",
                 arguments = listOf(navArgument("transactionId") { type = NavType.IntType })
             ) { backStackEntry ->
                 val transactionId = backStackEntry.arguments?.getInt("transactionId") ?: 0
-                AddExpense(navController = navController, isIncome = false, transactionId = transactionId)
+                AddTransaction(navController = navController, isIncome = false, transactionId = transactionId)
             }
         }
     }

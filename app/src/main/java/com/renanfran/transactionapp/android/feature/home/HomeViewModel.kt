@@ -28,9 +28,9 @@ class HomeViewModel @Inject constructor(val dao: TransactionDao) : BaseViewModel
 
     override fun onEvent(event: UiEvent) {
         when (event) {
-            is HomeUiEvent.OnAddExpenseClicked -> {
+            is HomeUiEvent.OnAddTransactionClicked -> {
                 viewModelScope.launch {
-                    _navigationEvent.emit(HomeNavigationEvent.NavigateToAddExpense)
+                    _navigationEvent.emit(HomeNavigationEvent.NavigateToAddTransaction)
                 }
             }
 
@@ -105,7 +105,7 @@ class HomeViewModel @Inject constructor(val dao: TransactionDao) : BaseViewModel
 }
 
 sealed class HomeUiEvent : UiEvent() {
-    data object OnAddExpenseClicked : HomeUiEvent()
+    data object OnAddTransactionClicked : HomeUiEvent()
     data object OnAddIncomeClicked : HomeUiEvent()
     data object OnSeeAllClicked : HomeUiEvent()
 }

@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.renanfran.transactionapp.android.feature.add_expense
+package com.renanfran.transactionapp.android.feature.add_transaction
 
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -57,7 +57,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.renanfran.transactionapp.android.R
-import com.renanfran.transactionapp.android.base.AddExpenseNavigationEvent
+import com.renanfran.transactionapp.android.base.AddTransactionNavigationEvent
 import com.renanfran.transactionapp.android.base.NavigationEvent
 import com.renanfran.transactionapp.android.utils.Utils
 import com.renanfran.transactionapp.android.data.model.TransactionEntity
@@ -67,11 +67,11 @@ import com.renanfran.transactionapp.android.ui.theme.Typography
 import com.renanfran.transactionapp.android.widget.ExpenseTextView
 
 @Composable
-fun AddExpense(
+fun AddTransaction(
     navController: NavController,
     isIncome: Boolean,
     transactionId: Int? = null, // New parameter for editing
-    viewModel: AddExpenseViewModel = hiltViewModel()
+    viewModel: AddTransactionViewModel = hiltViewModel()
 ) {
     val menuExpanded = remember { mutableStateOf(false) }
 
@@ -85,7 +85,7 @@ fun AddExpense(
         viewModel.navigationEvent.collect { event ->
             when (event) {
                 NavigationEvent.NavigateBack -> navController.popBackStack()
-                AddExpenseNavigationEvent.MenuOpenedClicked -> {
+                AddTransactionNavigationEvent.MenuOpenedClicked -> {
                     menuExpanded.value = true
                 }
                 else -> {}
@@ -116,7 +116,7 @@ fun AddExpense(
                 Image(painter = painterResource(id = R.drawable.ic_back), contentDescription = null,
                     modifier = Modifier
                         .align(Alignment.CenterStart)
-                        .clickable { viewModel.onEvent(AddExpenseUiEvent.OnBackPressed) })
+                        .clickable { viewModel.onEvent(AddTransactionUiEvent.OnBackPressed) })
                 ExpenseTextView(
                     text = "${if (isIncome) "Receita" else "Despesa"}",
                     style = Typography.titleLarge,
@@ -130,8 +130,8 @@ fun AddExpense(
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 },
-                onAddExpenseClick = {
-                    viewModel.onEvent(AddExpenseUiEvent.OnAddExpenseClicked(it))
+                onAddTransactionClick = {
+                    viewModel.onEvent(AddTransactionUiEvent.OnAddTransactionClicked(it))
                 },
                 isIncome = isIncome,
                 transactionData = transactionData // Prefill form with existing data if editing
@@ -143,7 +143,7 @@ fun AddExpense(
 @Composable
 fun DataForm(
     modifier: Modifier,
-    onAddExpenseClick: (model: TransactionEntity) -> Unit,
+    onAddTransactionClick: (model: TransactionEntity) -> Unit,
     isIncome: Boolean,
     transactionData: TransactionEntity? = null // Optional parameter for existing data
 ) {
@@ -258,7 +258,7 @@ fun DataForm(
                     date = Utils.formatDateToHumanReadableForm(date.longValue),
                     type = type.value
                 )
-                onAddExpenseClick(model)
+                onAddTransactionClick(model)
             },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(8.dp)
@@ -358,7 +358,7 @@ fun ExpenseDropDown(listOfItems: List<String>, onItemSelected: (item: String) ->
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewAddExpense() {
-    AddExpense(rememberNavController(), true)
+fun PreviewAddTransaction() {
+    AddTransaction(rememberNavController(), true)
 }
 

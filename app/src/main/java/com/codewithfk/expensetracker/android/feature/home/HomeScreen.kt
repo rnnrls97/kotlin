@@ -1,5 +1,6 @@
 package com.codewithfk.expensetracker.android.feature.home
 
+import android.graphics.Bitmap
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -35,6 +36,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,6 +48,8 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.codewithfk.expensetracker.android.data.model.ExpenseEntity
 import com.codewithfk.expensetracker.android.ui.theme.Zinc
 import com.codewithfk.expensetracker.android.widget.ExpenseTextView
@@ -63,6 +68,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
     val state = viewModel.expenses.collectAsState(initial = emptyList())
     val (showDialog, setShowDialog) = remember { mutableStateOf(false) }
     var transactionToDelete by remember { mutableStateOf<ExpenseEntity?>(null) }
+    val randomImageUrl by viewModel.randomImageUrl.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->
@@ -79,18 +85,10 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
     Surface(modifier = Modifier.fillMaxSize()) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (nameRow, list, card, topBar, add) = createRefs()
-            Image(
-                painter = painterResource(id = R.drawable.ic_topbar),
-                contentDescription = null,
-                modifier = Modifier.constrainAs(topBar) {
-                    top.linkTo(parent.top)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                }
-            )
+
             Box(modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 64.dp, start = 16.dp, end = 16.dp)
+                .padding(top = 10.dp, start = 16.dp, end = 16.dp)
                 .constrainAs(nameRow) {
                     top.linkTo(parent.top)
                     start.linkTo(parent.start)
@@ -106,9 +104,12 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 },
-                balance = balance, income = income, expense = expense
+                balance = balance,
+                income = income,
+                expense = expense,
+                image = randomImageUrl
             )
-            TransactionList(
+            TransactionList( 
                 modifier = Modifier
                     .fillMaxWidth()
                     .constrainAs(list) {
@@ -236,60 +237,87 @@ fun MultiFloatingActionButton(
 @Composable
 fun CardItem(
     modifier: Modifier,
-    balance: String, income: String, expense: String
+    balance: String, income: String, expense: String,
+    image: Bitmap? // Pass the image URL from the ViewModel
 ) {
-    Column(
+    Box(
         modifier = modifier
             .padding(16.dp)
             .fillMaxWidth()
             .height(200.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(Zinc)
-            .padding(16.dp)
     ) {
-        Box(
+        // Background image
+        if (image != null) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current).data(image).build(),
+                contentDescription = "Random Background",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(16.dp)),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.Gray)
+            )
+        }
+
+        // Overlay content
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
+                .fillMaxSize()
+                .padding(16.dp)
+                .background(
+                    color = Color.Black.copy(alpha = 0.4f), // Semi-transparent overlay
+                    shape = RoundedCornerShape(16.dp)
+                )
         ) {
-            Column {
-                ExpenseTextView(
-                    text = "Carteira",
-                    style = Typography.titleMedium,
-                    color = Color.White
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .weight(1f)
+            ) {
+                Column {
+                    ExpenseTextView(
+                        text = "Carteira",
+                        style = Typography.titleMedium,
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.size(8.dp))
+                    ExpenseTextView(
+                        text = balance, style = Typography.headlineLarge, color = Color.White,
+                    )
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .weight(1f)
+            ) {
+                CardRowItem(
+                    modifier = Modifier.align(Alignment.CenterStart),
+                    title = "Receita",
+                    amount = income,
+                    imaget = R.drawable.ic_income
                 )
                 Spacer(modifier = Modifier.size(8.dp))
-                ExpenseTextView(
-                    text = balance, style = Typography.headlineLarge, color = Color.White,
+                CardRowItem(
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    title = "Despesa",
+                    amount = expense,
+                    imaget = R.drawable.ic_expense
                 )
             }
         }
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        ) {
-            CardRowItem(
-                modifier = Modifier
-                    .align(Alignment.CenterStart),
-                title = "Receita",
-                amount = income,
-                imaget = R.drawable.ic_income
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-            CardRowItem(
-                modifier = Modifier
-                    .align(Alignment.CenterEnd),
-                title = "Despesa",
-                amount = expense,
-                imaget = R.drawable.ic_expense
-            )
-        }
-
     }
 }
-
 
 @Composable
 fun TransactionList(

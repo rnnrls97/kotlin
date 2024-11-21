@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.codewithfk.expensetracker.android"
+    namespace = "com.renanfran.transactionapp.android"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.codewithfk.expensetracker.android"
+        applicationId = "com.renanfran.transactionapp.android"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

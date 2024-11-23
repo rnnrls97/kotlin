@@ -70,7 +70,7 @@ fun NavHostScreen() {
                 StatsScreen(navController)
             }
             composable(route = "/all_transactions") {
-                bottomBarVisibility = true // Show the bottom bar if you want it visible
+                bottomBarVisibility = true
                 TransactionListScreen(navController)
             }
             composable(
@@ -95,7 +95,6 @@ fun NavigationBottomBar(
     navController: NavController,
     items: List<NavItem>
 ) {
-    // Bottom Navigation Bar
     val navBackStackEntry = navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry.value?.destination?.route
 

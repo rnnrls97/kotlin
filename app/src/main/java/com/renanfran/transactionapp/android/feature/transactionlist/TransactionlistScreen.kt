@@ -43,8 +43,8 @@ import com.renanfran.transactionapp.android.widget.ExpenseTextView
 @Composable
 fun TransactionListScreen(navController: NavController, viewModel: HomeViewModel = hiltViewModel()) {
     val state = viewModel.expenses.collectAsState(initial = emptyList())
-    var filterType by remember { mutableStateOf("All") }
-    var dateRange by remember { mutableStateOf("All Time") }
+    var filterType by remember { mutableStateOf("Todos") }
+    var dateRange by remember { mutableStateOf("Sempre") }
     var menuExpanded by remember { mutableStateOf(false) }
 
     val filteredTransactions = when (filterType) {
@@ -65,7 +65,6 @@ fun TransactionListScreen(navController: NavController, viewModel: HomeViewModel
                     .fillMaxWidth()
                     .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
             ) {
-                // Back Button
                 Image(
                     painter = painterResource(id = R.drawable.ic_back),
                     contentDescription = "Back",
@@ -75,7 +74,6 @@ fun TransactionListScreen(navController: NavController, viewModel: HomeViewModel
                     colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(Color.Black)
                 )
 
-                // Title
                 ExpenseTextView(
                     text = "Transações",
                     fontSize = 18.sp,
@@ -85,7 +83,6 @@ fun TransactionListScreen(navController: NavController, viewModel: HomeViewModel
                         .align(Alignment.Center)
                 )
 
-                // Three Dots Menu
                 Image(
                     painter = painterResource(id = R.drawable.ic_filter),
                     contentDescription = null,
@@ -98,7 +95,6 @@ fun TransactionListScreen(navController: NavController, viewModel: HomeViewModel
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // Content area for the transaction list
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -106,7 +102,6 @@ fun TransactionListScreen(navController: NavController, viewModel: HomeViewModel
                     .padding(horizontal = 16.dp)
             ) {
                 item {
-                    // Dropdowns
                     AnimatedVisibility(
                         visible = menuExpanded,
                         enter = slideInVertically(initialOffsetY = { -it / 2 }),
@@ -114,23 +109,21 @@ fun TransactionListScreen(navController: NavController, viewModel: HomeViewModel
                         modifier = Modifier.padding(8.dp)
                     ) {
                         Column {
-                            // Type Filter Dropdown
                             ExpenseDropDown(
-                                listOfItems = listOf("All", "Despesa", "Receita"),
+                                listOfItems = listOf("Todos", "Despesa", "Receita"),
                                 onItemSelected = { selected ->
                                     filterType = selected
-                                    menuExpanded = false // Close menu after selection
+                                    menuExpanded = false
                                 }
                             )
 
                             Spacer(modifier = Modifier.height(8.dp))
 
-                            // Date Range Filter Dropdown
                             ExpenseDropDown(
-                                listOfItems = listOf( "Yesterday", "Today", "Last 30 Days", "Last 90 Days", "Last Year"),
+                                listOfItems = listOf("Ontem", "Hoje", "30 dias", "90 dias", "Ano Passado"),
                                 onItemSelected = { selected ->
                                     dateRange = selected
-                                    menuExpanded = false // Close menu after selection
+                                    menuExpanded = false 
                                 }
                             )
                         }

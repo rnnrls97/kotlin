@@ -34,9 +34,9 @@ class AddTransactionViewModel @Inject constructor(val dao: TransactionDao) : Bas
         return try {
             withContext(Dispatchers.IO) {
                 if (TransactionEntity.id == null) {
-                    dao.insertExpense(TransactionEntity) // Insert new transaction
+                    dao.insertExpense(TransactionEntity)
                 } else {
-                    dao.updateExpense(TransactionEntity) // Update existing transaction
+                    dao.updateExpense(TransactionEntity)
                 }
             }
             true

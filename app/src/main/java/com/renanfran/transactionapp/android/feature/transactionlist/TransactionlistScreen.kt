@@ -54,7 +54,6 @@ fun TransactionListScreen(navController: NavController, viewModel: HomeViewModel
     }
 
     val filteredByDateRange = filteredTransactions.filter { transaction ->
-        // Apply date range filter logic here
         true
     }
 
@@ -131,9 +130,11 @@ fun TransactionListScreen(navController: NavController, viewModel: HomeViewModel
                 }
                 items(filteredByDateRange) { item ->
                     val icon = Utils.getItemIcon(item)
+                    val amount = if (item.type == "Receita") item.amount else item.amount * -1
+
                     TransactionItem(
                         title = item.title,
-                        amount = item.amount.toString(),
+                        amount = Utils.formatCurrency(amount),
                         icon = icon!!,
                         date = item.date,
                         color = if (item.type == "Receita") Color.Green else Color.Red,

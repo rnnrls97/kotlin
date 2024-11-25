@@ -184,7 +184,7 @@ fun MultiFloatingActionButton(
                     Box(
                         modifier = Modifier
                             .size(48.dp)
-                            .background(color = Zinc, shape = RoundedCornerShape(12.dp))
+                            .background(color = Zinc, shape = RoundedCornerShape(24.dp))
                             .clickable {
                                 onAddIncomeClicked.invoke()
                             },
@@ -200,7 +200,7 @@ fun MultiFloatingActionButton(
                     Box(
                         modifier = Modifier
                             .size(48.dp)
-                            .background(color = Zinc, shape = RoundedCornerShape(12.dp))
+                            .background(color = Zinc, shape = RoundedCornerShape(24.dp))
                             .clickable {
                                 onAddTransactionClicked.invoke()
                             },
@@ -217,9 +217,9 @@ fun MultiFloatingActionButton(
             // Main FAB
             Box(
                 modifier = Modifier
-                    .padding(8.dp)
-                    .size(60.dp)
-                    .clip(RoundedCornerShape(16.dp))
+                    .padding(16.dp)
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(32.dp))
                     .background(color = Zinc)
                     .clickable {
                         expanded = !expanded
@@ -228,8 +228,8 @@ fun MultiFloatingActionButton(
             ) {
                 Image(
                     painter = painterResource(R.drawable.ic_addbutton),
-                    contentDescription = "small floating action button",
-                    modifier = Modifier.size(40.dp)
+                    contentDescription = "Multi FAB",
+                    modifier = Modifier.size(100.dp)
                 )
             }
         }

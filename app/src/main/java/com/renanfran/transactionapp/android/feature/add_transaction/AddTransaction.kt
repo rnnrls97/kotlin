@@ -25,6 +25,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -77,7 +78,7 @@ fun AddTransaction(
 
     LaunchedEffect(transactionId) {
         if (transactionId != null) {
-           viewModel.loadTransaction(transactionId) // Load transaction if editing
+            viewModel.loadTransaction(transactionId) // Load transaction if editing
         }
     }
 
@@ -97,33 +98,36 @@ fun AddTransaction(
 
     Surface(modifier = Modifier.fillMaxSize()) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (nameRow, card, topBar) = createRefs()
-            Image(painter = painterResource(id = R.drawable.ic_topbar),
-                contentDescription = null,
-                modifier = Modifier.constrainAs(topBar) {
-                    top.linkTo(parent.top)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                })
+            val (nameRow, card) = createRefs()
+
             Box(modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 64.dp, start = 16.dp, end = 16.dp)
+                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
                 .constrainAs(nameRow) {
                     top.linkTo(parent.top)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 }) {
-                Image(painter = painterResource(id = R.drawable.ic_back), contentDescription = null,
+                // Back button
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_back), // Replace with your back icon
+                    contentDescription = "Back",
                     modifier = Modifier
                         .align(Alignment.CenterStart)
-                        .clickable { viewModel.onEvent(AddTransactionUiEvent.OnBackPressed) })
+                        .clickable {
+                            viewModel.onEvent(AddTransactionUiEvent.OnBackPressed)
+                        }
+                )
+                // Title text
                 ExpenseTextView(
                     text = "${if (isIncome) "Receita" else "Despesa"}",
                     style = Typography.titleLarge,
                     color = Color.White,
-                    modifier = Modifier.padding(16.dp).align(Alignment.Center)
+                    modifier = Modifier
+                        .align(Alignment.Center)
                 )
             }
+
             DataForm(
                 modifier = Modifier.constrainAs(card) {
                     top.linkTo(nameRow.bottom)

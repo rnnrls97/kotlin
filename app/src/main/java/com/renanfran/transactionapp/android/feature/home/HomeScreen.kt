@@ -108,7 +108,10 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                 balance = balance,
                 income = income,
                 expense = expense,
-                image = randomImageUrl
+                image = randomImageUrl,
+                onImageDoubleTapped = {
+                    randomImageUrl?.let { viewModel.saveImage(it) }
+                }
             )
             HorizontalDivider(thickness = 2.dp)
             TransactionList( 
@@ -239,8 +242,11 @@ fun MultiFloatingActionButton(
 @Composable
 fun CardItem(
     modifier: Modifier,
-    balance: String, income: String, expense: String,
-    image: Bitmap? // Pass the image URL from the ViewModel
+    balance: String,
+    income: String,
+    expense: String,
+    image: Bitmap?, // Pass the image to be displayed
+    onImageDoubleTapped: () -> Unit // Add the callback for double-tap
 ) {
     Box(
         modifier = modifier
@@ -248,6 +254,11 @@ fun CardItem(
             .fillMaxWidth()
             .height(200.dp)
             .clip(RoundedCornerShape(16.dp))
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onDoubleTap = { onImageDoubleTapped() } // Trigger the double-tap callback
+                )
+            }
     ) {
         // Background image
         if (image != null) {

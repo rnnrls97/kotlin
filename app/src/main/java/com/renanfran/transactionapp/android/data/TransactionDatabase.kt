@@ -6,7 +6,9 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.renanfran.transactionapp.android.data.dao.RandomImageDao
 import com.renanfran.transactionapp.android.data.dao.TransactionDao
+import com.renanfran.transactionapp.android.data.model.RandomImageEntity
 import com.renanfran.transactionapp.android.data.model.TransactionEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -16,11 +18,11 @@ import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
 
-@Database(entities = [TransactionEntity::class], version = 1, exportSchema = false)
-@Singleton
+@Database(entities = [TransactionEntity::class, RandomImageEntity::class], version = 1, exportSchema = false)
 abstract class TransactionDatabase : RoomDatabase() {
 
-    abstract fun TransactionDao(): TransactionDao
+    abstract fun transactionDao(): TransactionDao
+    abstract fun randomImageDao(): RandomImageDao
 
     companion object {
         const val DATABASE_NAME = "transaction_database"
@@ -28,14 +30,13 @@ abstract class TransactionDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: TransactionDatabase? = null
 
-        fun getInstance(@ApplicationContext context: Context): TransactionDatabase {
+        fun getInstance(context: Context): TransactionDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     TransactionDatabase::class.java,
                     DATABASE_NAME
-                )
-                    .build()
+                ).build()
                 INSTANCE = instance
                 instance
             }

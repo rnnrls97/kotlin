@@ -24,7 +24,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.renanfran.transactionapp.android.feature.add_transaction.AddTransaction
 import com.renanfran.transactionapp.android.feature.home.HomeScreen
-import com.renanfran.transactionapp.android.feature.stats.StatsScreen
+import com.renanfran.transactionapp.android.feature.stats.ImagesScreen
 import com.renanfran.transactionapp.android.feature.transactionlist.TransactionListScreen
 import com.renanfran.transactionapp.android.ui.theme.Zinc
 
@@ -67,7 +67,7 @@ fun NavHostScreen() {
 
             composable(route = "/stats") {
                 bottomBarVisibility = true
-                StatsScreen(navController)
+                ImagesScreen(navController)
             }
             composable(route = "/all_transactions") {
                 bottomBarVisibility = true

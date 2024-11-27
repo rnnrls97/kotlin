@@ -1,6 +1,8 @@
 package com.renanfran.transactionapp.android.feature.home
 
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,13 +31,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -62,14 +67,15 @@ import com.renanfran.transactionapp.android.ui.theme.LightGrey
 import com.renanfran.transactionapp.android.ui.theme.Red
 import com.renanfran.transactionapp.android.ui.theme.Typography
 import com.renanfran.transactionapp.android.utils.Utils
+import java.util.UUID
 
 
 @Composable
 fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltViewModel()) {
     val state = viewModel.expenses.collectAsState(initial = emptyList())
+    val randomImageUrl by viewModel.randomImageUrl.collectAsState() // Observe random image state
     val (showDialog, setShowDialog) = remember { mutableStateOf(false) }
     var transactionToDelete by remember { mutableStateOf<TransactionEntity?>(null) }
-    val randomImageUrl by viewModel.randomImageUrl.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->
@@ -85,20 +91,23 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
 
     Surface(modifier = Modifier.fillMaxSize()) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (nameRow, list, card, topBar, add) = createRefs()
+            val (nameRow, list, card, add) = createRefs()
 
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp, start = 16.dp, end = 16.dp)
-                .constrainAs(nameRow) {
-                    top.linkTo(parent.top)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                })
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp, start = 16.dp, end = 16.dp)
+                    .constrainAs(nameRow) {
+                        top.linkTo(parent.top)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    }
+            )
 
             val expense = viewModel.getTotalExpense(state.value)
             val income = viewModel.getTotalIncome(state.value)
             val balance = viewModel.getBalance(state.value)
+
             CardItem(
                 modifier = Modifier.constrainAs(card) {
                     top.linkTo(nameRow.bottom)
@@ -111,10 +120,13 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                 image = randomImageUrl,
                 onImageDoubleTapped = {
                     randomImageUrl?.let { viewModel.saveImage(it) }
+                },
+                onClick = {
+                    navController.navigate("/saved_images")
                 }
             )
-            HorizontalDivider(thickness = 2.dp)
-            TransactionList( 
+
+            TransactionList(
                 modifier = Modifier
                     .fillMaxWidth()
                     .constrainAs(list) {
@@ -143,9 +155,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                         viewModel.deleteTransaction(transactionToDelete!!)
                         setShowDialog(false)
                     },
-                    onDismiss = {
-                        setShowDialog(false)
-                    }
+                    onDismiss = { setShowDialog(false) }
                 )
             }
 
@@ -158,11 +168,15 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                     },
                 contentAlignment = Alignment.BottomEnd
             ) {
-                MultiFloatingActionButton(modifier = Modifier, {
-                    viewModel.onEvent(HomeUiEvent.OnAddTransactionClicked)
-                }, {
-                    viewModel.onEvent(HomeUiEvent.OnAddIncomeClicked)
-                })
+                MultiFloatingActionButton(
+                    modifier = Modifier,
+                    onAddTransactionClicked = {
+                        viewModel.onEvent(HomeUiEvent.OnAddTransactionClicked)
+                    },
+                    onAddIncomeClicked = {
+                        viewModel.onEvent(HomeUiEvent.OnAddIncomeClicked)
+                    }
+                )
             }
         }
     }
@@ -181,7 +195,6 @@ fun MultiFloatingActionButton(
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Secondary FABs
             AnimatedVisibility(visible = expanded) {
                 Column(horizontalAlignment = Alignment.End, modifier = Modifier.padding(16.dp)) {
                     Box(
@@ -217,7 +230,6 @@ fun MultiFloatingActionButton(
                     }
                 }
             }
-            // Main FAB
             Box(
                 modifier = Modifier
                     .padding(16.dp)
@@ -241,12 +253,13 @@ fun MultiFloatingActionButton(
 
 @Composable
 fun CardItem(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     balance: String,
     income: String,
     expense: String,
-    image: Bitmap?, // Pass the image to be displayed
-    onImageDoubleTapped: () -> Unit // Add the callback for double-tap
+    image: Bitmap?,
+    onImageDoubleTapped: () -> Unit,
+    onClick: () -> Unit
 ) {
     Box(
         modifier = modifier
@@ -256,73 +269,77 @@ fun CardItem(
             .clip(RoundedCornerShape(16.dp))
             .pointerInput(Unit) {
                 detectTapGestures(
-                    onDoubleTap = { onImageDoubleTapped() } // Trigger the double-tap callback
+                    onTap = { onClick() },
+                    onDoubleTap = { onImageDoubleTapped() }
                 )
             }
     ) {
-        // Background image
+
         if (image != null) {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current).data(image).build(),
-                contentDescription = "Random Background",
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(16.dp)),
+            Image(
+                bitmap = image.asImageBitmap(),
+                contentDescription = "Background Image",
+                modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
         } else {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(RoundedCornerShape(16.dp))
                     .background(Color.Gray)
-            )
+                    .clip(RoundedCornerShape(16.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No Image",
+                    style = Typography.bodyMedium,
+                    color = Color.White
+                )
+            }
         }
 
-        // Overlay content
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
                 .background(
-                    color = Color.Black.copy(alpha = 0.4f), // Semi-transparent overlay
+                    color = Color.Black.copy(alpha = 0.4f),
                     shape = RoundedCornerShape(16.dp)
                 )
         ) {
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
                     .weight(1f)
             ) {
-                Column {
-                    ExpenseTextView(
-                        text = "Carteira",
-                        style = Typography.titleMedium,
-                        color = Color.White
-                    )
-                    Spacer(modifier = Modifier.size(8.dp))
-                    ExpenseTextView(
-                        text = balance, style = Typography.headlineLarge, color = Color.White,
-                    )
-                }
+                Text(
+                    text = "Carteira",
+                    style = Typography.titleMedium,
+                    color = Color.White
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = balance,
+                    style = Typography.headlineLarge,
+                    color = Color.White
+                )
             }
 
-            Box(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
-                    .weight(1f)
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 CardRowItem(
-                    modifier = Modifier.align(Alignment.CenterStart),
+                    modifier = Modifier,
                     title = "Receita",
                     amount = income,
                     imaget = R.drawable.ic_income
                 )
-                Spacer(modifier = Modifier.size(8.dp))
                 CardRowItem(
-                    modifier = Modifier.align(Alignment.CenterEnd),
+                    modifier = Modifier,
                     title = "Despesa",
                     amount = expense,
                     imaget = R.drawable.ic_expense
@@ -339,7 +356,7 @@ fun TransactionList(
     title: String = "Transações Recentes",
     onSeeAllClicked: () -> Unit,
     onItemClicked: (TransactionEntity) -> Unit,
-    onItemLongPressed: (TransactionEntity) -> Unit // Added long press callback
+    onItemLongPressed: (TransactionEntity) -> Unit
 ) {
     LazyColumn(modifier = modifier.padding(horizontal = 16.dp)) {
         item {

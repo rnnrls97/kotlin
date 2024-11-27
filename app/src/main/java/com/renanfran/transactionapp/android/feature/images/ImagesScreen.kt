@@ -1,4 +1,4 @@
-package com.renanfran.transactionapp.android.feature.stats
+package com.renanfran.transactionapp.android.feature.images
 
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -31,9 +31,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.renanfran.transactionapp.android.data.model.RandomImageEntity
+import com.renanfran.transactionapp.android.feature.home.HomeViewModel
 
 @Composable
-fun ImagesScreen(navController: NavController, viewModel: ImagesViewModel = hiltViewModel()) {
+fun ImagesScreen(
+    navController: NavController,
+    viewModel: ImagesViewModel = hiltViewModel(),
+    homeViewModel: HomeViewModel = hiltViewModel()
+) {
     val imagesState = viewModel.images.collectAsState(initial = emptyList())
     val imageToDelete = remember { mutableStateOf<RandomImageEntity?>(null) }
     val showDialog = remember { mutableStateOf(false) }
@@ -56,8 +61,15 @@ fun ImagesScreen(navController: NavController, viewModel: ImagesViewModel = hilt
                     ImageCard(
                         imageEntity = imageEntity,
                         onLongPress = {
-                            imageToDelete.value = imageEntity // Update using `.value`
-                            showDialog.value = true // Update using `.value`
+                            imageToDelete.value = imageEntity
+                            showDialog.value = true
+                        },
+                        onClick = {
+                            val bitmap = BitmapFactory.decodeByteArray(
+                                imageEntity.imageBitmap, 0, imageEntity.imageBitmap.size
+                            )
+                            homeViewModel.setRandomImage(bitmap)
+                            navController.popBackStack()
                         }
                     )
                 }
@@ -90,7 +102,11 @@ fun ImagesScreen(navController: NavController, viewModel: ImagesViewModel = hilt
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ImageCard(imageEntity: RandomImageEntity, onLongPress: () -> Unit) {
+fun ImageCard(
+    imageEntity: RandomImageEntity,
+    onClick: () -> Unit,
+    onLongPress: () -> Unit
+) {
     val bitmap = remember {
         BitmapFactory.decodeByteArray(imageEntity.imageBitmap, 0, imageEntity.imageBitmap.size)
     }
@@ -101,8 +117,8 @@ fun ImageCard(imageEntity: RandomImageEntity, onLongPress: () -> Unit) {
             .height(200.dp)
             .clip(RoundedCornerShape(16.dp))
             .combinedClickable(
-                onClick = {}, // No-op for regular clicks
-                onLongClick = onLongPress // Trigger on long press
+                onClick = onClick,
+                onLongClick = onLongPress
             )
     ) {
         Image(

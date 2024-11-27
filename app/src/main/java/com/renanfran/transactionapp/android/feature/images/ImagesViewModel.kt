@@ -1,4 +1,4 @@
-package com.renanfran.transactionapp.android.feature.stats
+package com.renanfran.transactionapp.android.feature.images
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -2,6 +2,8 @@ package com.renanfran.transactionapp.android.feature.home
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.renanfran.transactionapp.android.base.BaseViewModel
 import com.renanfran.transactionapp.android.base.HomeNavigationEvent
@@ -15,25 +17,23 @@ import com.renanfran.transactionapp.android.data.service.RetrofitInstance
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val dao: TransactionDao, // DAO for transaction operations
-    private val imageDao: RandomImageDao // DAO for image storage
+    private val dao: TransactionDao,
+    private val imageDao: RandomImageDao
 ) : BaseViewModel() {
 
-    // Expenses state
     val expenses = dao.getAllExpense()
-
-    // Random image state
     private val _randomImageUrl = MutableStateFlow<Bitmap?>(null)
-    val randomImageUrl: StateFlow<Bitmap?> get() = _randomImageUrl
+    val randomImageUrl: StateFlow<Bitmap?> = _randomImageUrl.asStateFlow()
 
     init {
-        fetchRandomImage() // Fetch a random image when ViewModel is created
+        fetchRandomImage()
     }
 
     override fun onEvent(event: UiEvent) {
@@ -56,7 +56,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    // Calculate total balance
     fun getBalance(list: List<TransactionEntity>): String {
         val balance = list.sumOf { expense ->
             if (expense.type == "Receita") expense.amount else -expense.amount
@@ -64,59 +63,56 @@ class HomeViewModel @Inject constructor(
         return Utils.formatCurrency(balance)
     }
 
-    // Calculate total expenses
     fun getTotalExpense(list: List<TransactionEntity>): String {
         val total = list.filter { it.type != "Receita" }.sumOf { it.amount }
         return Utils.formatCurrency(total)
     }
 
-    // Calculate total income
     fun getTotalIncome(list: List<TransactionEntity>): String {
         val totalIncome = list.filter { it.type == "Receita" }.sumOf { it.amount }
         return Utils.formatCurrency(totalIncome)
     }
 
-    // Delete a transaction
     fun deleteTransaction(expense: TransactionEntity) {
         viewModelScope.launch {
             dao.deleteExpense(expense)
         }
     }
 
-    // Fetch a random image
     fun fetchRandomImage() {
         viewModelScope.launch {
             try {
                 val random = System.currentTimeMillis()
                 val responseBody = RetrofitInstance.api.getRandomImage(random)
-                val imageBytes = responseBody.bytes() // Convert response to byte array
+                val imageBytes = responseBody.bytes()
                 val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
 
-                _randomImageUrl.value = bitmap // Update state
+                _randomImageUrl.value = bitmap
             } catch (e: Exception) {
-                e.printStackTrace() // Log errors
+                e.printStackTrace()
             }
         }
     }
 
-    // Save an image to the database
     fun saveImage(image: Bitmap?) {
         if (image != null) {
             viewModelScope.launch {
                 try {
-                    // Convert Bitmap to ByteArray
                     val byteArrayOutputStream = ByteArrayOutputStream()
                     image.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
                     val byteArray = byteArrayOutputStream.toByteArray()
 
-                    // Save image to database
                     val imageEntity = RandomImageEntity(imageBitmap = byteArray)
                     imageDao.insertImage(imageEntity)
                 } catch (e: Exception) {
-                    e.printStackTrace() // Log errors
+                    e.printStackTrace()
                 }
             }
         }
+    }
+
+    fun setRandomImage(bitmap: Bitmap) {
+        _randomImageUrl.value = bitmap
     }
 }
 

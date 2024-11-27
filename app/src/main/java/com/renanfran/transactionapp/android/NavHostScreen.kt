@@ -24,32 +24,36 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.renanfran.transactionapp.android.feature.add_transaction.AddTransaction
 import com.renanfran.transactionapp.android.feature.home.HomeScreen
-import com.renanfran.transactionapp.android.feature.stats.ImagesScreen
+import com.renanfran.transactionapp.android.feature.images.ImagesScreen
 import com.renanfran.transactionapp.android.feature.transactionlist.TransactionListScreen
 import com.renanfran.transactionapp.android.ui.theme.Zinc
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.ui.graphics.vector.ImageVector
 
 @Composable
 fun NavHostScreen() {
     val navController = rememberNavController()
-    var bottomBarVisibility by remember {
-        mutableStateOf(true)
+    var bottomBarVisibility by remember { mutableStateOf(true) }
 
-    }
-    Scaffold(bottomBar = {
-        AnimatedVisibility(visible = bottomBarVisibility) {
-            NavigationBottomBar(
-                navController = navController,
-                items = listOf(
-                    NavItem(route = "/home", icon = R.drawable.ic_home),
-                    NavItem(route = "/stats", icon = R.drawable.ic_stats)
+    Scaffold(
+        bottomBar = {
+            AnimatedVisibility(visible = bottomBarVisibility) {
+                NavigationBottomBar(
+                    navController = navController,
+                    items = listOf(
+                        NavItem(route = "/home", icon = Icons.Filled.Home),
+                        NavItem(route = "/saved_images", icon = Icons.Filled.FavoriteBorder)
+                    )
                 )
-            )
+            }
         }
-    }) {
+    ) { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = "/home",
-            modifier = Modifier.padding(it)
+            modifier = Modifier.padding(innerPadding)
         ) {
             composable(route = "/home") {
                 bottomBarVisibility = true
@@ -58,36 +62,43 @@ fun NavHostScreen() {
 
             composable(route = "/add_income") {
                 bottomBarVisibility = false
-                AddTransaction(navController, isIncome = true)
-            }
-            composable(route = "/add_exp") {
-                bottomBarVisibility = false
-                AddTransaction(navController, isIncome = false)
+                AddTransaction(navController = navController, isIncome = true)
             }
 
-            composable(route = "/stats") {
-                bottomBarVisibility = true
-                ImagesScreen(navController)
+            composable(route = "/add_exp") {
+                bottomBarVisibility = false
+                AddTransaction(navController = navController, isIncome = false)
             }
+
+            composable(route = "/saved_images") {
+                bottomBarVisibility = true
+                ImagesScreen(navController = navController)
+            }
+
             composable(route = "/all_transactions") {
                 bottomBarVisibility = true
-                TransactionListScreen(navController)
+                TransactionListScreen(navController = navController)
             }
+
             composable(
                 route = "/edit_transaction/{transactionId}",
                 arguments = listOf(navArgument("transactionId") { type = NavType.IntType })
             ) { backStackEntry ->
                 val transactionId = backStackEntry.arguments?.getInt("transactionId") ?: 0
-                AddTransaction(navController = navController, isIncome = false, transactionId = transactionId)
+                bottomBarVisibility = false
+                AddTransaction(
+                    navController = navController,
+                    isIncome = false,
+                    transactionId = transactionId
+                )
             }
         }
     }
 }
 
-
 data class NavItem(
     val route: String,
-    val icon: Int
+    val icon: ImageVector
 )
 
 @Composable
@@ -112,7 +123,10 @@ fun NavigationBottomBar(
                     }
                 },
                 icon = {
-                    Icon(painter = painterResource(id = item.icon), contentDescription = null)
+                    Icon(
+                        imageVector = item.icon,
+                        contentDescription = null
+                    )
                 },
                 alwaysShowLabel = false,
                 colors = NavigationBarItemDefaults.colors(

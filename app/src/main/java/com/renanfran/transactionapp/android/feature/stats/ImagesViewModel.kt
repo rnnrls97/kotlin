@@ -31,4 +31,10 @@ class ImagesViewModel @Inject constructor(
             started = SharingStarted.Lazily,
             initialValue = emptyList()
         )
+
+    fun deleteImage(imageEntity: RandomImageEntity) {
+        viewModelScope.launch {
+            imageDao.deleteImage(imageEntity)
+        }
+    }
 }

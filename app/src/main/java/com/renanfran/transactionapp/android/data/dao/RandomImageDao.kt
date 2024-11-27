@@ -17,5 +17,8 @@ interface RandomImageDao {
     suspend fun insertImage(image: RandomImageEntity)
 
     @Query("SELECT * FROM random_images ORDER BY timestamp DESC")
-    fun getAllImages(): Flow<List<RandomImageEntity>> // Should return a Flow
+    fun getAllImages(): Flow<List<RandomImageEntity>>
+
+    @Delete
+    suspend fun deleteImage(image: RandomImageEntity)
 }

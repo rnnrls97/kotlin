@@ -18,7 +18,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
 
-@Database(entities = [TransactionEntity::class, RandomImageEntity::class], version = 1, exportSchema = false)
+@Database(entities = [TransactionEntity::class, RandomImageEntity::class], version = 2, exportSchema = false)
 abstract class TransactionDatabase : RoomDatabase() {
 
     abstract fun transactionDao(): TransactionDao

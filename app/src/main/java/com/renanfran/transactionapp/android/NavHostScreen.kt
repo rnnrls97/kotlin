@@ -2,6 +2,7 @@ package com.renanfran.transactionapp.android
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBarItem
@@ -31,6 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun NavHostScreen() {
@@ -125,7 +127,8 @@ fun NavigationBottomBar(
                 icon = {
                     Icon(
                         imageVector = item.icon,
-                        contentDescription = null
+                        contentDescription = null,
+                        modifier = Modifier.size(36.dp)
                     )
                 },
                 alwaysShowLabel = false,

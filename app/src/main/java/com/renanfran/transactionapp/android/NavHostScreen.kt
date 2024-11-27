@@ -33,6 +33,9 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.renanfran.transactionapp.android.feature.home.HomeViewModel
+import com.renanfran.transactionapp.android.feature.images.ImagesViewModel
 
 @Composable
 fun NavHostScreen() {
@@ -59,8 +62,10 @@ fun NavHostScreen() {
         ) {
             composable(route = "/home") {
                 bottomBarVisibility = true
-                HomeScreen(navController)
+                val homeViewModel: HomeViewModel = hiltViewModel(navController.getBackStackEntry("/home"))
+                HomeScreen(navController = navController, viewModel = homeViewModel)
             }
+
 
             composable(route = "/add_income") {
                 bottomBarVisibility = false
@@ -74,7 +79,9 @@ fun NavHostScreen() {
 
             composable(route = "/saved_images") {
                 bottomBarVisibility = true
-                ImagesScreen(navController = navController)
+                val imageScreenViewModel: ImagesViewModel = hiltViewModel()
+                val homeViewModel: HomeViewModel = hiltViewModel(navController.getBackStackEntry("/home"))
+                ImagesScreen(navController = navController, viewModel = imageScreenViewModel, homeViewModel = homeViewModel)
             }
 
             composable(route = "/all_transactions") {

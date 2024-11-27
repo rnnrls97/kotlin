@@ -69,11 +69,10 @@ import com.renanfran.transactionapp.android.ui.theme.Typography
 import com.renanfran.transactionapp.android.utils.Utils
 import java.util.UUID
 
-
 @Composable
 fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltViewModel()) {
     val state = viewModel.expenses.collectAsState(initial = emptyList())
-    val randomImageUrl by viewModel.randomImageUrl.collectAsState() // Observe random image state
+    val randomImageUrl by viewModel.randomImageUrl.collectAsState()
     val (showDialog, setShowDialog) = remember { mutableStateOf(false) }
     var transactionToDelete by remember { mutableStateOf<TransactionEntity?>(null) }
 
@@ -121,9 +120,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                 onImageDoubleTapped = {
                     randomImageUrl?.let { viewModel.saveImage(it) }
                 },
-                onClick = {
-                    navController.navigate("/saved_images")
-                }
+                onClick = {}
             )
 
             TransactionList(
@@ -291,7 +288,7 @@ fun CardItem(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "No Image",
+                    text = "Sem imagem",
                     style = Typography.bodyMedium,
                     color = Color.White
                 )

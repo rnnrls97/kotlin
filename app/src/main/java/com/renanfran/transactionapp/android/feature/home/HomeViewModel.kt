@@ -15,6 +15,7 @@ import com.renanfran.transactionapp.android.data.model.RandomImageEntity
 import com.renanfran.transactionapp.android.data.model.TransactionEntity
 import com.renanfran.transactionapp.android.data.service.RetrofitInstance
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,11 +25,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val dao: TransactionDao,
+    private val transactionDao: TransactionDao,
     private val imageDao: RandomImageDao
 ) : BaseViewModel() {
 
-    val expenses = dao.getAllExpense()
+    val expenses: Flow<List<TransactionEntity>> = transactionDao.getAllExpense()
+
     private val _randomImageUrl = MutableStateFlow<Bitmap?>(null)
     val randomImageUrl: StateFlow<Bitmap?> = _randomImageUrl.asStateFlow()
 
@@ -38,15 +40,10 @@ class HomeViewModel @Inject constructor(
 
     override fun onEvent(event: UiEvent) {
         when (event) {
-            is HomeUiEvent.OnAddTransactionClicked -> {
-                navigateTo(HomeNavigationEvent.NavigateToAddTransaction)
-            }
-            is HomeUiEvent.OnAddIncomeClicked -> {
-                navigateTo(HomeNavigationEvent.NavigateToAddIncome)
-            }
-            is HomeUiEvent.OnSeeAllClicked -> {
-                navigateTo(HomeNavigationEvent.NavigateToSeeAll)
-            }
+            is HomeUiEvent.OnAddTransactionClicked -> navigateTo(HomeNavigationEvent.NavigateToAddTransaction)
+            is HomeUiEvent.OnAddIncomeClicked -> navigateTo(HomeNavigationEvent.NavigateToAddIncome)
+            is HomeUiEvent.OnSeeAllClicked -> navigateTo(HomeNavigationEvent.NavigateToSeeAll)
+            else -> Unit
         }
     }
 
@@ -56,57 +53,58 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun getBalance(list: List<TransactionEntity>): String {
-        val balance = list.sumOf { expense ->
-            if (expense.type == "Receita") expense.amount else -expense.amount
+    fun getBalance(transactions: List<TransactionEntity>): String {
+        val balance = transactions.sumOf { transaction ->
+            if (transaction.type == "Receita") transaction.amount else -transaction.amount
         }
         return Utils.formatCurrency(balance)
     }
 
-    fun getTotalExpense(list: List<TransactionEntity>): String {
-        val total = list.filter { it.type != "Receita" }.sumOf { it.amount }
-        return Utils.formatCurrency(total)
+    fun getTotalExpense(transactions: List<TransactionEntity>): String {
+        val totalExpense = transactions.filter { it.type != "Receita" }.sumOf { it.amount }
+        return Utils.formatCurrency(totalExpense)
     }
 
-    fun getTotalIncome(list: List<TransactionEntity>): String {
-        val totalIncome = list.filter { it.type == "Receita" }.sumOf { it.amount }
+    fun getTotalIncome(transactions: List<TransactionEntity>): String {
+        val totalIncome = transactions.filter { it.type == "Receita" }.sumOf { it.amount }
         return Utils.formatCurrency(totalIncome)
     }
 
-    fun deleteTransaction(expense: TransactionEntity) {
+    fun deleteTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
-            dao.deleteExpense(expense)
+            runCatching {
+                transactionDao.deleteExpense(transaction)
+            }.onFailure { e ->
+                e.printStackTrace()
+            }
         }
     }
 
     fun fetchRandomImage() {
         viewModelScope.launch {
-            try {
+            runCatching {
                 val random = System.currentTimeMillis()
                 val responseBody = RetrofitInstance.api.getRandomImage(random)
                 val imageBytes = responseBody.bytes()
-                val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-
+                BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+            }.onSuccess { bitmap ->
                 _randomImageUrl.value = bitmap
-            } catch (e: Exception) {
+            }.onFailure { e ->
                 e.printStackTrace()
             }
         }
     }
 
     fun saveImage(image: Bitmap?) {
-        if (image != null) {
-            viewModelScope.launch {
-                try {
-                    val byteArrayOutputStream = ByteArrayOutputStream()
-                    image.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
-                    val byteArray = byteArrayOutputStream.toByteArray()
-
-                    val imageEntity = RandomImageEntity(imageBitmap = byteArray)
-                    imageDao.insertImage(imageEntity)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
+        if (image == null) return
+        viewModelScope.launch {
+            runCatching {
+                val byteArrayOutputStream = ByteArrayOutputStream()
+                image.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+                val byteArray = byteArrayOutputStream.toByteArray()
+                imageDao.insertImage(RandomImageEntity(imageBitmap = byteArray))
+            }.onFailure { e ->
+                e.printStackTrace()
             }
         }
     }
@@ -117,7 +115,7 @@ class HomeViewModel @Inject constructor(
 }
 
 sealed class HomeUiEvent : UiEvent() {
-    data object OnAddTransactionClicked : HomeUiEvent()
-    data object OnAddIncomeClicked : HomeUiEvent()
-    data object OnSeeAllClicked : HomeUiEvent()
+    object OnAddTransactionClicked : HomeUiEvent()
+    object OnAddIncomeClicked : HomeUiEvent()
+    object OnSeeAllClicked : HomeUiEvent()
 }

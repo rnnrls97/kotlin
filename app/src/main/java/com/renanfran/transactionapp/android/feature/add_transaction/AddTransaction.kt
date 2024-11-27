@@ -122,7 +122,7 @@ fun AddTransaction(
                 ExpenseTextView(
                     text = "${if (isIncome) "Receita" else "Despesa"}",
                     style = Typography.titleLarge,
-                    color = Color.White,
+                    color = Color.Black,
                     modifier = Modifier
                         .align(Alignment.Center)
                 )
